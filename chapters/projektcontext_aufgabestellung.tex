@@ -1,0 +1,122 @@
+\chapter{Projektkontext und Aufgabestellung}
+\label{chap:projektkontext}
+\section{Überblick}
+
+Im vorherigen Kapitel wurden die wesentlichen technologischen Grundlagen moderner KaVo-Dentaleinheiten beschrieben. Dazu zählen sowohl der grundsätzliche Aufbau und die Funktionsweise der Behandlungseinheit, die internen Hygieneprozesse als auch die Software \textit{CONNECTbase}. Ergänzend dazu wurde der aktuelle funktionale Stand analysiert und bestehende Einschränkungen im Hinblick auf Automatisierungspotenziale aufgezeigt.
+
+Diese Konzepte und Beobachtungen bilden die notwendige Grundlage, um die Motivation, Zielsetzung und Umsetzung dieser Arbeit zu verstehen. In den folgenden Abschnitten werden nun die funktionalen und technischen Anforderungen herausgearbeitet, die sich aus den Bedürfnissen der verschiedenen Zielgruppen ergeben – insbesondere im Hinblick auf eine lokal funktionierende Echtzeit-Datenübertragung, automatisierbare Abläufe und die nahtlose Einbindung in bestehende digitale Praxisinfrastrukturen.
+
+
+\section{Kundenbedürfnisse und Marktsituation}
+\subsection{Stakeholder}
+
+Im dentalmedizinischen Umfeld existieren verschiedene Anspruchsgruppen mit unterschiedlichen Anforderungen an die technische Infrastruktur von Dentaleinheiten. Zu den wichtigsten Stakeholdern zählen:
+
+\begin{itemize}
+    \item \textbf{Einzelpraxen:} Kleine bis mittelgroße Zahnarztpraxen mit einer oder mehreren Dentaleinheiten, in denen Effizienz und Benutzerfreundlichkeit im Vordergrund stehen.\\
+    \item \textbf{Kliniken und Universitäten:} Ausbildungszentren mit mehreren Dutzend Einheiten, in denen parallele Hygieneprozesse, zentrale Steuerung und Zustandsvisualisierung essenziell sind.\\
+    \item \textbf{Dental Service Organizations (DSOs):} Unternehmen, die als technische Dienstleister für Zahnarztpraxen agieren, streben einen Echtzeitzugriff auf Stuhldaten in einem offenen Format an – bei gleichzeitig voller Kontrolle über die Integration und Nutzung innerhalb ihrer eigenen Systeme.\\
+    \item \textbf{Servicetechniker:} Vor-Ort-Personal, das zur Diagnose und Wartung physischen Zugriff auf Zustandsinformationen, Fehlerprotokolle und Live-Daten der Dentaleinheiten benötigt.
+\end{itemize}
+
+\subsection{Stakeholder-Stories}
+
+Zur Verdeutlichung der Anforderungen werden im Folgenden Stakeholder-Stories vorgestellt, die typische Nutzungssituationen und Problemstellungen beschreiben:
+
+\begin{itemize}
+    \item \textbf{Zahnarztpraxis:} "Vor dem Schließen der Praxis muss die Assistenzkraft nach dem Ende des Hygieneprogramms den Stuhl manuell ausschalten und am nächsten Morgen vor Beginn des Praxisbetriebs wieder manuell einschalten. In stressigen Situationen wird dies manchmal vergessen oder verspätet durchgeführt."\\
+    
+    \item \textbf{Universitätsklinik:} "In unserer Ausbildungsumgebung betreuen wir mehr als 30 Behandlungsstühle. Eine zentrale Überwachung des Hygienezustands, von Fehlermeldungen und des allgemeinen Gerätestatus würde unseren administrativen Aufwand massiv senken. Aktuell besteht die einzige Möglichkeit, alle Stühle gleichzeitig ein- oder auszuschalten, darin, die zentrale Stromversorgung zu aktivieren oder zu trennen. Für eine flexible und gezielte Steuerung einzelner Einheiten – etwa um gezielt einzelne Geräte vor oder nach dem Betrieb ein- oder auszuschalten – fehlt derzeit eine geeignete Lösung. Diese Einschränkung erschwert einen effizienten und situationsabhängigen Betrieb erheblich."\\
+
+    \item \textbf{DSO-Mitarbeiter:} "Wir betreuen überregionale Zahnarztpraxen und möchten deren Effizienz messen und verbessern.  Dafür benötigen wir strukturierten Zugriff auf die Daten der Behandlungseinheiten – insbesondere Sensor-werte und Statusinformationen. Diese Informationen möchten wir in unsere eigene Service- und Managementsoftware integrieren, um einen effizient und vorausschauend planen zu können. Derzeit fehlt uns jedoch eine geeignete Schnittstelle, um auf diese Daten mit unseren bestehenden lokalen Systemen zuzugreifen."\\
+
+    \item \textbf{Servicetechniker:} " Ich möchten schon bei dem Vor-Ort-Einsatz genau wissen, welcher Fehler aufgetreten ist. Dafür benötige ich strukturierten Zugriff auf die Daten der Behandlungseinheiten – insbesondere Sensor-werte, Fehlerprotokolle und Statusinformationen. Eine lokale, automatisierte Übertragung an mein Gerät vor Ort wäre sehr hilfreich.."
+\end{itemize}
+
+\section{Funktionale und Nicht-Funktionale Anforderungen}
+
+Aus den Stakeholder-Stories lassen sich konkrete Anforderungen ableiten, die ein umfassendes Verständnis für die funktionalen und nicht-funktionalen Erwartungen an das System schaffen.
+
+\subsection{Funktionale Anforderungen:}
+\textbf{Hinweis:} Mit „System“ ist im Folgenden die im Rahmen dieser Arbeit entwickelte Gesamtlösung gemeint.
+
+\begin{enumerate}
+    \item \textbf{Automatisierte Steuerung der Stromversorgung:} \\
+    Das System soll die Behandlungseinheit nach Abschluss des abendlichen Hygieneprogramms automatisch ausschalten und am nächsten Morgen vor Beginn des Praxisbetriebs wieder einschalten, um manuelle Eingriffe durch das Assistenzpersonal zu vermeiden.\\
+    
+    \item \textbf{Zugriff auf Betriebsdaten:} \\
+    Das System soll strukturierten Zugriff auf Echtzeit-Sensordaten, Fehlerprotokolle und Statusinformationen jeder Behandlungseinheit bereitstellen.\\
+
+    \item \textbf{Schnittstelle für Drittanbieter-Integration:} \\
+    Das System soll eine Schnittstelle bereitstellen, über die Drittanbieter-Software auf die Daten der Behandlungseinheiten zugreifen und diese in externe Service- oder Managementplattformen integrieren kann. Auch Servicetechniker sollen über diese Schnittstelle automatisiert auf relevante Diagnosedaten – wie Fehlerprotokolle und Statusinformationen – zugreifen können, um Wartung und Fehleranalyse effizient durchführen zu können.\\
+
+    \item \textbf{Automatische Geräteerkennung und einfache Integration} \\
+    Das System soll kompatible Dentaleinheiten im lokalen Netzwerk automatisch erkennen und es dem Benutzer ermöglichen, diese mit minimalem Konfigurationsaufwand in die zentrale Plattform zur Visualisierung und Steuerung der Daten der Dentaleinheiten einzubinden(Home Assistant).\\
+
+    \item \textbf{Zentrales Überwachungs-Dashboard:} \\
+    Das System soll eine zentrale Benutzeroberfläche bereitstellen, über die der Hygienezustand, Fehlerprotokolle und der Betriebsstatus aller angeschlossenen Behandlungseinheiten überwacht werden können.\\
+
+    \item \textbf{Individuelle Steuerung einzelner Geräte:} \\
+    Das System soll ermöglichen, einzelne Behandlungseinheiten gezielt ein- oder auszuschalten, ohne den Stromzustand anderer Geräte zu beeinflussen.\\
+
+    \item \textbf{Offline-Betrieb:} \\
+    Das System soll sämtliche Funktionen unabhängig von einer bestehenden Internetverbindung ausführen können, einschließlich Gerätesteuerung, Überwachung, Automatisierung und Datenzugriff.
+\end{enumerate}
+
+\subsection{Nicht-Funktionale Anforderungen:}
+
+\begin{enumerate}
+    \item \textbf{Zuverlässigkeit (Reliability):} \\
+    Das System soll während des täglichen Praxisbetriebs zuverlässig funktionieren und automatisierte Aufgaben (z.B. das Ein- und Ausschalten von Geräten) konsistent und fehlerfrei ausführen.\\
+
+    \item \textbf{Skalierbarkeit (Scalability):} \\
+    Das System soll die zentrale Überwachung und Steuerung einer großen Anzahl von Behandlungseinheiten (z.B. 30 oder mehr) unterstützen, ohne dass es zu Leistungseinbußen kommt.\\
+
+    \item \textbf{Wartbarkeit (Maintainability:)} \\
+    Das System soll modular und erweiterbar aufgebaut sein, sodass zukünftige Anpassungen (z.B. das Hinzufügen neuer Datenpunkte) mit minimalem Aufwand möglich sind.\\
+
+    \item \textbf{Benutzerfreundlichkeit (Usability):} \\
+    Die Benutzeroberfläche soll sowohl für Praxispersonal als auch für Servicetechniker intuitiv bedienbar sein, nur minimale Schulung erfordern und schnellen Zugriff auf wichtige Funktionen und Statusinformationen ermöglichen.\\
+
+    \item \textbf{Dateninteroperabilität:} \\
+    Das System soll die Daten in einem strukturierten, offenen und dokumentierten Format bereitstellen, um eine nahtlose Integration in Drittanbietersysteme zu ermöglichen.\\
+
+    \item \textbf{Sicherheit und Zugriffskontrolle:} \\
+    Das System soll den Zugriff auf sicherheitskritische Steuerfunktionen und Daten durch Benutzerrollen oder Authentifizierungsmechanismen beschränken, um unbefugten Zugriff zu verhindern.
+\end{enumerate}
+
+Die funktionalen und nicht-funktionalen Anforderungen gelten gleichermaßen für bestehende Lösungen von KaVo sowie für das im Rahmen dieser Arbeit entwickelte Konzept bzw. den erstellten Prototypen. Sie dienen als Bewertungsmaßstab dafür, inwiefern die vorhandenen Systeme bereits den identifizierten Bedarf der Stakeholder abdecken und in welchen Bereichen das entwickelte System eine Erweiterung oder Verbesserung darstellt.
+
+
+\section{Aufgabenstellung}
+
+\subsection*{Was ist im bestehenden System vorhanden?}
+
+\begin{itemize}
+  \item Die KaVo-Dentaleinheit verfügt über interne Steuerungsmechanismen zur Ausführung von Hygieneprozessen.\\
+  \item Es existiert ein interner Ansatz zur Übertragung von Stuhldaten an das proprietäre KaVo-Cloud-System für Fernwartungszwecke; diese Funktionalität befindet sich derzeit in Entwicklung und ist nicht für die Anbindung externer Systeme vorgesehen.\\
+  \item Die Stromversorgung der Dentaleinheit wird über ein zentrales Netzteil realisiert, das ausschließlich manuell geschaltet werden kann und nicht durch die Dentaleinheit selbst.\\
+  \item Das CONNECTbase ist über das vorhandene CAN-Bus-System mit anderen Steuergeräten innerhalb der Dentaleinheit verbunden und kann deren Nachrichten empfangen und auswerten.
+\end{itemize}
+
+Dieses Verständnis der bestehenden Systemarchitektur bildet die Grundlage, um gezielt neue Funktionen zu ergänzen und eine erweiterbare Lösung innerhalb der bestehenden Infrastruktur zu entwickeln.
+
+\subsection*{Was muss im Rahmen dieser Arbeit entwickelt werden?}
+
+Ausgehend von den funktionalen Anforderungen ergibt sich folgender Aufgabenbereich für die prototypische Umsetzung:
+
+\begin{enumerate}
+    \item \textbf{Schnittstelle zur externen Datenübertragung:} \\
+    Es soll eine Testumgebung entwickelt werden, die das zukünftige Übertragungsverhalten der Dentaleinheit simuliert. Ziel ist es, exemplarisch darzustellen, wie die Daten in Echtzeit aus dem System heraus an externe Lösungen übermittelt werden könnten – einschließlich der Herkunft, Struktur und Übertragungslogik der Daten. Die Umsetzung erfolgt in einer Entwicklungsumgebung, die der Architektur von \textit{CONNECTbase} entspricht (Qt, C++) und auf vergleichbarer Hardware (z.\,B. Raspberry Pi 4) basiert, sodass eine spätere Integration in die bestehende CONNECTbase-Architektur möglichst nahtlos erfolgen kann.
+
+    Besonderer Wert wird darauf gelegt, dass die Schnittstelle vollständig ohne bestehende Internetverbindung funktioniert und eine möglichst geringe Latenz (im Bereich weniger Millisekunden) bei der Datenübertragung gewährleistet ist.\\
+
+    \item \textbf{Externe Automatisierungs- und Visualisierungsplattform:} \\
+    Zur Veranschaulichung und Evaluierung der Integrationsmöglichkeiten wird eine externe Umgebung geschaffen, die die empfangenen Stuhldaten zentral visualisiert und auf dieser Basis bestimmte Workflows (z.\,B. zeitgesteuertes Ein-/Ausschalten) automatisiert. Als konkrete Implementierung wurde in diesem Projekt \textbf{Home Assistant} verwendet – eine offene, lokal laufende Automatisierungsplattform, die sich ideal für die flexible Verarbeitung und Darstellung von Echtzeitdaten eignet. Diese Lösung dient gleichzeitig als Beispiel für eine mögliche Implementierungsvariante, wie Dritte die empfangenen Daten in eigene Systeme einbinden und verarbeiten können.\\
+
+    \item \textbf{Automatisierte Steuerung der Stromversorgung ohne Eingriff in die bestehende Hardware:} \\
+    Es soll eine Lösung entwickelt werden, mit der sich die zentrale Stromversorgung der Dentaleinheit automatisiert ein- und ausschalten lässt, ohne Veränderungen an der bestehenden Stromversorgungsplatine vorzunehmen. Die Umsetzung muss hardwareseitig kompatibel, rückbaubar und sicher in der Anwendung sein.
+\end{enumerate}
+
+Die erfolgreiche Umsetzung dieser drei Komponenten führt zu einer voll funktionsfähigen und zuverlässigen Lösung, die die identifizierten Herausforderungen der Stakeholder gezielt adressiert.
+

@@ -1,0 +1,144 @@
+\documentclass[12pt,a4paper,automark,headsepline]{scrreprt}
+
+
+% ===================== KOMA OPTIONS =====================
+\KOMAoptions{
+  listof=totoc,
+  bibliography=totoc,
+  numbers=noenddot
+}
+
+% ===================== PACKAGES =====================
+\usepackage[utf8]{inputenc}          % UTF-8 support
+\usepackage[T1]{fontenc}             % Correct font encoding
+\usepackage[ngerman]{babel}          % German language
+\usepackage{libertinus}              % Professional serif font
+\usepackage{graphicx}                % Include graphics
+\usepackage{tabularx}                % Put this in your preamble
+\usepackage{array}
+\usepackage{svg}                     % Support for SVG images
+\usepackage{amsmath, amssymb}        % Math extensions
+\usepackage{booktabs}                % Nicer tables
+\usepackage{newunicodechar}
+\newunicodechar{├}{|}
+\usepackage{tabularx}                % Advanced tables
+\usepackage{caption}                 % Better captions
+\usepackage{listings}                % Code listings
+\usepackage{xcolor}                  % Color for listings
+\usepackage{hyperref}                % Hyperlinks
+\usepackage{csquotes}                % Quotation handling
+\usepackage[style=ieee]{biblatex}    % Bibliography style
+\addbibresource{bibliography.bib}
+
+\usepackage{pdfpages}                % Include PDF pages
+\usepackage{scrlayer-scrpage}        % Proper header/footer for KOMA
+\usepackage{microtype}               % Better justification
+\usepackage{setspace}                % Line spacing
+\usepackage{float}                   % For [H] figure placement
+
+\RedeclareSectionCommand[
+  beforeskip=1.5ex plus .2ex minus .2ex,
+  afterskip=0.5ex,
+  font=\Large\bfseries
+]{subsection}
+
+\RedeclareSectionCommand[
+  beforeskip=1.5ex plus .2ex minus .2ex,
+  afterskip=0.5ex,
+  font=\large\bfseries
+]{subsubsection}
+% ===================== PAGE SETTINGS =====================
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}           % Adds \subsubsection to TOC
+\clearpairofpagestyles             % Clear existing header/footer
+\ihead{\leftmark}                  % Chapter title on inner (left) header
+\ohead{}                           % Leave outer (right) header empty
+\cfoot{\pagemark}                 % Page number in center footer
+
+\pagestyle{scrheadings}           % Activate the style
+\renewcommand*\chaptermarkformat{\thechapter\autodot\enskip}  % Format chapter titles
+\renewcommand{\chapterpagestyle}{scrheadings}                 % Ensure chapter pages have headers
+
+
+\setlength{\parindent}{0pt}
+\onehalfspacing
+\setlength{\parskip}{0.8em}
+\setlength{\footskip}{80pt} 
+\addtolength{\textheight}{30pt} 
+
+\usepackage{listings}
+\usepackage{xcolor}
+\definecolor{strongpink}{RGB}{255, 105, 180} % HotPink / DeepPink
+
+\lstdefinelanguage{json}{
+    morestring=[b]",
+    morecomment=[l]{//},
+    morekeywords={true, false, null},
+    stringstyle=\color{teal},
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    basicstyle=\ttfamily,
+    showstringspaces=false,
+    breaklines=true
+}
+
+\usepackage[edges]{forest}
+\usepackage[
+  authorName        = {{Veera Goutham Venkatesh}},
+  authorEnrolmentNo = {2127743},
+  authorStreet      = {{Am Silbermannpark 17}},
+  authorZip         = {86161},
+  authorCity        = {Augsburg},
+  authorEMail       = {{veera.goutham.venkatesh@hs-augsburg.de}},
+  authorPhone       = {+49 123 456789},
+  authorSignaturePlace = {Augsburg},
+  studyProgram      = {{Technische Informatik}},
+  studyDegree       = {{Bachelor of Engineering}},
+  thesisTitle       = {{Entwicklung einer lokalen Echzeit-IoT-Lösung zur automatisierten Steuerung dentaler Behandlungseinheiten unter Einbindung der Open-Source-Automatisierungsplattform Home Assistant}},
+  thesisType        = {Bachelorarbeit},
+  faculty           = {{Fakultät für Informatik}},
+  topicAssignment   = {2025-06-20},
+  submissionDate    = {2025-08-15},
+  supervisor        = {{Prof. Dr. Hubert Högl}}
+]{THA-Abschlussarbeit}
+
+
+
+% ===================== BEGIN DOCUMENT =====================
+\begin{document}
+
+% ----- Title page -----
+\THAtitlepage
+
+% ----- Task description as PDF (optional) -----
+%\includepdf[pages=-]{includes/aufgabenstellung.pdf}
+
+% ----- Confidentiality note (optional) -----
+%\input{includes/sperrvermerk}
+
+% ----- Declaration of originality -----
+%\input{includes/erklaerung}
+
+% ----- Lists -----
+\tableofcontents
+\listoffigures
+\listoftables
+\lstlistoflistings
+\include{includes/abkuerzungen}
+
+% ----- Main Chapters -----
+\include{chapters/einleitung}
+\include{chapters/grundlagen}
+\include{chapters/projektcontext_aufgabestellung}
+\include{chapters/implementierung}
+\include{chapters/fazit}
+
+% ----- Bibliography -----
+\printbibliography
+
+% ----- Appendix (optional) -----
+%\appendix
+%\include{chapters/anhang}
+\AuthorDeclaration
+\end{document}

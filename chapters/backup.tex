@@ -1,0 +1,167 @@
+\section{Technische Anforderungen und Rahmenbedingungen}
+
+Um ein funktionsfähiges und zukünftig erweiterbares System zu entwickeln, mussten mehrere Anforderungen und Einschränkungen berücksichtigt werden:
+
+\begin{itemize}
+    \item \textbf{Lokalität:} Das System darf ausschließlich lokal funktionieren – ohne Abhängigkeit von Internet oder Cloud-Diensten.
+    \item \textbf{Echtzeitverhalten:} Statusinformationen wie der Fortschritt von Hygieneschritten oder Fehlerprotokolle müssen ohne spürbare Verzögerung übertragen werden, um externe Automationen (z.\,B. das automatische Abschalten der Stromversorgung des Behandlungsstuhls nach Abschluss der Hygiene) zuverlässig auszulösen und eine zeitnahe Wartung zu ermöglichen.
+    \item \textbf{Hardwaregrenzen:} Als Hardwareplattform dient ein Raspberry Pi 4, der in puncto Ressourcen und Performance limitiert ist.
+    \item \textbf{Softwarestruktur:} Die Anwendung \textit{ConnectBase} ist in C++ mit \textit{Qt} umgesetzt und bietet bisher keine standardisierte Schnittstelle zur externen Datenübertragung.
+    \item \textbf{Erweiterbarkeit und Wartbarkeit:} Die entwickelte Lösung soll zukünftig in Produktionssysteme übertragbar und wartbar sein – modularer Aufbau und lose Kopplung sind essenziell.
+    \item \textbf{Verhaltensanforderungen:} Die Integration mit \textit{Home Assistant} muss zuverlässig folgende Funktionen unterstützen:
+    \begin{itemize}
+        \item automatische Erkennung der Behandlungseinheit im lokalen Netzwerk 
+        \item Statusabfrage und Live-Datenübermittlung 
+        \item Visualisierung von Betriebszuständen (z.\,B. Hygieneprogramm Calendar)
+        \item Auslösung externer Aktionen durch Home Assistant-Automationen (z.\,B. automatisches Abschalten des Behandlungsstuhls nach Abschluss eines Hygieneplans),
+        \item Robustheit gegenüber Netzwerkunterbrechungen und Systemneustarts.
+    \end{itemize}
+\end{itemize}
+
+Diese Anforderungen bestimmten die Architektur des Prototyps und flossen maßgeblich in die Bewertung der Lösungsansätze ein. Die technischen Hintergründe zu zentralen Konzepten wie dem \textit{ConnectBase}-System und den im Projekt betrachteten Hygieneabläufen in dentalen Behandlungsstühlen werden im folgenden Kapitel detailliert erläutert.
+
+Darüber hinaus wurde die erarbeitete Architektur bewusst so gestaltet, dass sie als Referenz für vergleichbare lokale IoT-Lösungen im medizinischen Umfeld dienen kann – unabhängig vom konkreten Einsatz an KaVo-Behandlungsstühlen.
+
+\subsection{Marktsituation und Trendbetrachtung}
+
+Die Nachfrage nach smarten, vernetzbaren und zugleich lokal betreibbaren Dentaleinheiten wächst stetig. Neben den klassischen Anforderungen wie Ergonomie und Zuverlässigkeit rücken digitale Integrationsfähigkeit, Automatisierungspotenzial und Datenschutz zunehmend in den Fokus. Hersteller, die hier frühzeitig auf offene, standardisierte Schnittstellen und modulare Architektur setzen, verschaffen sich klare Wettbewerbsvorteile – insbesondere im Klinik- und Ausbildungsumfeld sowie bei Serviceorganisationen.
+
+
+Die Schnittstelle wurde als WebSocket-Server implementiert, der strukturierte JSON-Daten (z.\,B. Sensorwerte, Statusinformationen) in Echtzeit an Clients überträgt. Diese Architektur unterstützt geringe Latenzzeiten und eignet sich ideal für lokal operierende Systeme.
+
+
+\subsection{Wie wurde die Übertragung technisch umgesetzt?}
+
+Die praktische Umsetzung der Übertragungsschnittstelle erfolgte in \textbf{C++} mit \textbf{Qt Creator} auf einem \textit{Raspberry Pi 400}. Dabei wurden ein \textbf{lokaler WebSocket-Server}, die dynamische \textbf{JSON-Generierung} sowie die automatische \textbf{Dienstveröffentlichung via QMdnsEngine} realisiert. 
+
+\vspace{1em}
+\paragraph{1. WebSocket-Server:} 
+
+Der WebSocket-Server wird über die Klasse \texttt{QWebSocketServer} in der Klasse \texttt{WebServerWindow} gestartet:
+
+\begin{lstlisting}[language=C++,caption={Starten des WebSocket-Servers},label={lst:websocket-server}]
+webSocketServer = new QWebSocketServer(QStringLiteral("Test Server"),
+QWebSocketServer::NonSecureMode, this);
+
+if (webSocketServer->listen(QHostAddress::Any, 8080)) {
+    connect(webSocketServer, &QWebSocketServer::newConnection,
+            this, &WebServerWindow::onNewConnection);
+}
+\end{lstlisting}
+
+Neue Clients werden verwaltet und automatisch mit einem initialen JSON-Objekt versorgt.
+
+\vspace{1em}
+\paragraph{2. JSON-Serialisierung und Datenversand}
+
+Zur Kommunikation werden dynamisch JSON-Objekte (\texttt{QJsonObject}) erzeugt. Diese enthalten z.\,B. Lichtstatus, Hygieneplan-Typen oder Planungsdaten. Die Objekte werden anschließend in einen kompakten \texttt{QString} serialisiert und an alle verbundenen Clients gesendet:
+
+\begin{lstlisting}[language=C++,caption={JSON-Objekt senden},label={lst:send-json}]
+void WebServerWindow::sendJson(const QJsonObject &data) {
+    QJsonDocument doc(data);
+    QString jsonString = doc.toJson(QJsonDocument::Compact);
+    for (QWebSocket *client : clients) {
+        client->sendTextMessage(jsonString);
+    }
+}
+\end{lstlisting}
+
+\vspace{1em}
+\paragraph{3. Automatische Dienstveröffentlichung mit QMdnsEngine}
+
+Zur automatischen Geräteerkennung im Netzwerk wurde die externe Open-Source-Bibliothek \texttt{QMdnsEngine} eingebunden. Die Integration erfolgte über eine eigene Klasse \texttt{MdnsPublisher} mit folgender Initialisierung:
+
+\begin{lstlisting}[language=C++,caption={Veröffentlichen eines mDNS-Dienstes},label={lst:qmdns-publish}]
+MdnsPublisher mdns;
+QMap<QString , QString> txt = {
+    {"manufacturer", "KaVo"},
+    {"model", "Testerchair"},
+    {"version", "1.0.1"}
+};
+mdns.publish("KaVo TC 1", 8080, txt);
+\end{lstlisting}
+
+Die Klasse selbst nutzt intern einen \texttt{QMdnsEngine::Provider}, um den Dienst unter \texttt{\_kavochair.\_tcp.local} zu veröffentlichen. Diese Veröffentlichung erfolgt alle 30 Sekunden erneut, um die Sichtbarkeit im Netzwerk sicherzustellen.
+
+\vspace{1em}
+\paragraph{4. Integration der QMdnsEngine-Bibliothek}
+
+Da es sich um eine externe Bibliothek handelt, wurde der Quellcode direkt in das Projekt integriert:
+
+\begin{itemize}
+  \item Der Ordner \texttt{qmdnsengine} wurde in den Projektpfad \texttt{external/} eingebunden.
+  \item Die Header und Quelldateien wurden in der Projektdatei \texttt{.pro} referenziert.
+  \item Eine eigene \texttt{Qmdns.h/.cpp}-Klasse kapselt die Bibliotheksfunktionen.
+\end{itemize}
+
+Die Datei \texttt{Qmdns.h} definiert die Klasse \texttt{MdnsPublisher}, die den Dienst initialisiert und mit Attributen ausstattet (z.\,B. Hersteller, Modell, Version). Die Veröffentlichung erfolgt mit:
+
+\begin{lstlisting}[language=C++,caption={QMdnsEngine: Dienstkonfiguration},label={lst:qmdns-config}]
+m_service.setName(serviceName);
+m_service.setType("_kavochair._tcp.local.");
+m_service.setPort(port);
+m_provider->update(m_service);
+\end{lstlisting}
+
+\vspace{1em}
+\paragraph{5. Projektstruktur}
+
+Die Projektstruktur wurde so aufgebaut, dass alle externen Abhängigkeiten (\texttt{qmdnsengine}) und Komponenten (WebSocket, GUI, JSON) übersichtlich getrennt und modular integriert sind:
+
+\begin{itemize}
+    \item \texttt{main.cpp} – Einstiegspunkt, startet GUI und mDNS
+    \item \texttt{webserverwindow.cpp/.h} – GUI, JSON-Logik und WebSocket-Kommunikation
+    \item \texttt{Qmdns.cpp/.h} – Wrapper für mDNS-Dienste mit QMdnsEngine
+    \item \texttt{external/qmdnsengine/} – Bibliothekscode
+\end{itemize}
+
+\begin{figure}[H]
+  \centering
+  \begin{forest}
+    for tree={
+      grow'=0,
+      child anchor=west,
+      parent anchor=west,
+      anchor=west,
+      calign=first,
+      l sep=22pt,           % vertical spacing (default was 19pt)
+      s sep=10pt,           % sibling spacing
+      inner sep=2pt,        % padding inside node
+      edge path={
+        \noexpand\path [draw, \forestoption{edge}]
+        (!u.parent anchor) -- +(-5pt,0) |- (.child anchor)\forestoption{edge label};
+      },
+      fit=band,
+      before computing xy={l=22pt}, % horizontal indent from parent
+    }
+    [projekt/
+      [CMakeLists.txt]
+      [Header-Dateien/
+        [webserverwindow.h]
+        [Qmdns.h]
+      ]
+      [Quellcode-Dateien/
+        [main.cpp]
+        [webserverwindow.cpp]
+        [Qmdns.cpp]
+      ]
+      [UI-Dateien/
+        [webserverwindow.ui]
+      ]
+      [external/
+        [QMdnsEngine/]
+      ]
+    ]
+  \end{forest}
+  \caption{Projektstruktur der Testumgebung mit \textit{WebSocket}-Server und \textit{QMdnsEngine}}
+  \label{fig:projektstruktur}
+\end{figure}
+
+Damit externe Clients den WebSocket-Server auch wirklich unter der vom mDNS-Dienst angekündigten Adresse erreichen können, wurde der Server auf \texttt{QHostAddress::Any} gebunden. Das bedeutet:
+
+\begin{itemize}
+  \item Der Server akzeptiert Verbindungen über \texttt{LAN (eth0)}, \texttt{WLAN (wlan0)} oder \texttt{localhost}.
+  \item Er ist automatisch kompatibel mit der IP-Adresse, die vom mDNS-Dienst ausgestrahlt wird.
+\end{itemize}
+
+Diese Kombination stellt sicher, dass externe Plattformen wie \textit{Home Assistant} den WebSocket-Endpunkt jederzeit zuverlässig finden und erreichen können – unabhängig vom verwendeten Netzwerkinterface der Dentaleinheit.
